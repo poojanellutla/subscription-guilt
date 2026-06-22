@@ -1,0 +1,168 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Subscription Guilt Calculator</title>
+  <link href="https://fonts.googleapis.com/css2?family=Syne:wght@700;800&family=Inter:wght@400;500;600&display=swap" rel="stylesheet"/>
+  <link rel="stylesheet" href="/static/css/style.css"/>
+</head>
+<body>
+
+<!-- HERO -->
+<section class="hero">
+  <div class="hero-badge">💸 FINANCIAL SELF-DESTRUCTION TRACKER</div>
+  <h1 class="hero-title">You're Probably<br/><span class="highlight">Bleeding Money</span><br/>Right Now.</h1>
+  <p class="hero-sub">The average American wastes <strong>$300+/year</strong> on subscriptions they barely touch.<br/>Find out how guilty <em>you</em> should feel.</p>
+  <button class="cta-btn" onclick="scrollToCalc()">Calculate My Guilt →</button>
+  <div class="hero-stats">
+    <div class="stat"><span class="stat-num">$900</span><span class="stat-label">avg spent/year</span></div>
+    <div class="stat-divider"></div>
+    <div class="stat"><span class="stat-num">4.5</span><span class="stat-label">unused subs per person</span></div>
+    <div class="stat-divider"></div>
+    <div class="stat"><span class="stat-num">35%</span><span class="stat-label">never cancelled on time</span></div>
+  </div>
+</section>
+
+<!-- HALL OF SHAME TICKER -->
+<div class="shame-ticker">
+  <div class="ticker-label">🔥 HALL OF SHAME</div>
+  <div class="ticker-track" id="tickerTrack">Loading...</div>
+</div>
+
+<!-- CALCULATOR -->
+<section class="calc-section" id="calculator">
+  <div class="calc-container">
+    <div class="calc-header">
+      <div class="frank-avatar">
+        <div class="frank-face">😤</div>
+        <div class="frank-name">FRANK<span>Your Broke Financial Advisor</span></div>
+      </div>
+      <h2>Enter Your Subscriptions</h2>
+      <p>Be honest. Frank is watching. Frank is already disappointed.</p>
+    </div>
+
+    <div class="nickname-row">
+      <label>Your nickname (for the leaderboard)</label>
+      <input type="text" id="nicknameInput" placeholder="e.g. BrokeButSubscribed" maxlength="20"/>
+    </div>
+
+    <div class="quick-add">
+      <p class="quick-label">⚡ Quick Add Popular:</p>
+      <div class="quick-tags" id="quickTags"></div>
+    </div>
+
+    <div id="subList"></div>
+    <button class="add-btn" onclick="addRow()">+ Add Subscription</button>
+    <button class="calc-btn" onclick="calculate()">
+      <span>Calculate My Guilt</span>
+      <span class="calc-btn-sub">Frank is ready to judge 💀</span>
+    </button>
+  </div>
+</section>
+
+<!-- RESULTS -->
+<section class="results-section" id="results" style="display:none">
+  <div class="results-container">
+
+    <!-- Frank's Verdict -->
+    <div class="frank-verdict" id="frankVerdict">
+      <div class="frank-big">😤</div>
+      <div class="frank-speech">
+        <div class="frank-tag">FRANK SAYS:</div>
+        <p id="frankIntro"></p>
+      </div>
+    </div>
+
+    <!-- Score Card -->
+    <div class="score-card" id="scoreCard">
+      <div class="score-grade" id="scoreGrade">F</div>
+      <div class="score-label">YOUR GUILT SCORE</div>
+      <div class="score-number" id="overallScore">0</div>
+      <div class="score-percentile" id="scorePercentile"></div>
+      <div class="score-desc" id="scoreDesc"></div>
+    </div>
+
+    <!-- Summary Grid -->
+    <div class="summary-grid">
+      <div class="summary-card red"><div class="summary-icon">🔥</div><div class="summary-value" id="monthlyTotal">$0</div><div class="summary-label">Spent Monthly</div></div>
+      <div class="summary-card orange"><div class="summary-icon">📆</div><div class="summary-value" id="yearlyTotal">$0</div><div class="summary-label">Spent Yearly</div></div>
+      <div class="summary-card purple"><div class="summary-icon">🗑️</div><div class="summary-value" id="wasteYearly">$0</div><div class="summary-label">Wasted Yearly</div></div>
+      <div class="summary-card green"><div class="summary-icon">💡</div><div class="summary-value" id="vsAverage">$0</div><div class="summary-label">vs. Avg American</div></div>
+    </div>
+
+    <!-- Frank's Roast per Sub -->
+    <div class="roast-section">
+      <h3>🎤 Frank's Roast</h3>
+      <p class="section-sub">Personalized feedback. Frank doesn't sugarcoat.</p>
+      <div id="roastList"></div>
+    </div>
+
+    <!-- Breakdown -->
+    <div class="breakdown">
+      <h3>Your Subscription Breakdown</h3>
+      <div id="breakdownList"></div>
+    </div>
+
+    <!-- Chart -->
+    <div class="chart-section">
+      <h3>Where Your Money Goes</h3>
+      <div class="chart-wrapper"><canvas id="guiltChart"></canvas></div>
+    </div>
+
+    <!-- Cut List -->
+    <div class="cut-section">
+      <h3>🔪 The Cut List</h3>
+      <p class="section-sub">Cancel these first. Frank insists.</p>
+      <div id="cutList"></div>
+    </div>
+
+    <!-- Frank Outro -->
+    <div class="frank-outro" id="frankOutro"></div>
+
+    <!-- Share Card -->
+    <div class="share-section">
+      <h3>📣 Flex Your Guilt Score</h3>
+      <p class="section-sub">Share it. Dare your friends to beat you.</p>
+      <div class="share-card" id="shareCard">
+        <div class="share-card-inner">
+          <div class="share-logo">💸 SubGuilt</div>
+          <div class="share-score-big" id="shareScoreBig">0</div>
+          <div class="share-label">GUILT SCORE</div>
+          <div class="share-grade-badge" id="shareGradeBadge">F</div>
+          <div class="share-stats" id="shareStats"></div>
+          <div class="share-url">subguilt.app</div>
+        </div>
+      </div>
+      <div class="share-btns">
+        <button class="share-btn twitter" onclick="shareTwitter()">Share on X/Twitter</button>
+        <button class="share-btn copy" onclick="copyShareText()">Copy Share Text</button>
+      </div>
+    </div>
+
+    <!-- Leaderboard -->
+    <div class="leaderboard-section">
+      <h3>🏆 Leaderboard</h3>
+      <div class="lb-tabs">
+        <button class="lb-tab active" onclick="switchTab('wasters')">Top Wasters 🔥</button>
+        <button class="lb-tab" onclick="switchTab('savers')">Top Savers 💚</button>
+      </div>
+      <div id="leaderboardList"></div>
+    </div>
+
+    <button class="recalc-btn" onclick="resetCalc()">← Recalculate</button>
+  </div>
+</section>
+
+<footer class="footer">
+  <p>Built for people who say "I barely use it" about everything they pay for.</p>
+  <p class="footer-sub">All data collected anonymously. No personal info stored ever.</p>
+</footer>
+
+<div id="confettiCanvas"></div>
+
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.9.2/dist/confetti.browser.min.js"></script>
+<script src="/static/js/app.js"></script>
+</body>
+</html>
