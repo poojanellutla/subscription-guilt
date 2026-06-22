@@ -11,10 +11,10 @@
 
 <!-- HERO -->
 <section class="hero">
-  <div class="hero-badge">💸 FINANCIAL SELF-DESTRUCTION TRACKER</div>
-  <h1 class="hero-title">You're Probably<br/><span class="highlight">Bleeding Money</span><br/>Right Now.</h1>
-  <p class="hero-sub">The average American wastes <strong>$300+/year</strong> on subscriptions they barely touch.<br/>Find out how guilty <em>you</em> should feel.</p>
-  <button class="cta-btn" onclick="scrollToCalc()">Calculate My Guilt →</button>
+  <div class="hero-badge">💸 BRUTAL FINANCIAL HONESTY TOOL</div>
+  <h1 class="hero-title">Your subscriptions have<br/><span class="highlight">more commitment</span><br/>than your relationships.</h1>
+  <p class="hero-sub">Steve looked at your finances.<br/><strong>Steve needed a moment.</strong><br/>Find out how bad it really is.</p>
+  <button class="cta-btn" onclick="scrollToCalc()">Let Steve Judge You →</button>
   <div class="hero-stats">
     <div class="stat"><span class="stat-num">$900</span><span class="stat-label">avg spent/year</span></div>
     <div class="stat-divider"></div>
@@ -34,12 +34,12 @@
 <section class="calc-section" id="calculator">
   <div class="calc-container">
     <div class="calc-header">
-      <div class="frank-avatar">
-        <div class="frank-face">😤</div>
-        <div class="frank-name">FRANK<span>Your Broke Financial Advisor</span></div>
+      <div class="steve-avatar">
+        <div class="steve-face">😩</div>
+        <div class="steve-name">STEVE<span>Recovering Accountant, Still Traumatized</span></div>
       </div>
       <h2>Enter Your Subscriptions</h2>
-      <p>Be honest. Frank is watching. Frank is already disappointed.</p>
+      <p>Be honest. Steve has seen worse. Steve has not seen worse.</p>
     </div>
 
     <div class="nickname-row">
@@ -56,7 +56,7 @@
     <button class="add-btn" onclick="addRow()">+ Add Subscription</button>
     <button class="calc-btn" onclick="calculate()">
       <span>Calculate My Guilt</span>
-      <span class="calc-btn-sub">Frank is ready to judge 💀</span>
+      <span class="calc-btn-sub">Steve is bracing himself 😬</span>
     </button>
   </div>
 </section>
@@ -65,12 +65,12 @@
 <section class="results-section" id="results" style="display:none">
   <div class="results-container">
 
-    <!-- Frank's Verdict -->
-    <div class="frank-verdict" id="frankVerdict">
-      <div class="frank-big">😤</div>
-      <div class="frank-speech">
-        <div class="frank-tag">FRANK SAYS:</div>
-        <p id="frankIntro"></p>
+    <!-- Steve's Verdict -->
+    <div class="steve-verdict" id="steveVerdict">
+      <div class="steve-big">😩</div>
+      <div class="steve-speech">
+        <div class="steve-tag">STEVE SAYS:</div>
+        <p id="steveIntro"></p>
       </div>
     </div>
 
@@ -91,10 +91,10 @@
       <div class="summary-card green"><div class="summary-icon">💡</div><div class="summary-value" id="vsAverage">$0</div><div class="summary-label">vs. Avg American</div></div>
     </div>
 
-    <!-- Frank's Roast per Sub -->
+    <!-- Steve's Roast -->
     <div class="roast-section">
-      <h3>🎤 Frank's Roast</h3>
-      <p class="section-sub">Personalized feedback. Frank doesn't sugarcoat.</p>
+      <h3>🎤 Steve's Roast</h3>
+      <p class="section-sub">Personalized feedback. Steve doesn't sugarcoat.</p>
       <div id="roastList"></div>
     </div>
 
@@ -104,21 +104,22 @@
       <div id="breakdownList"></div>
     </div>
 
-    <!-- Chart -->
-    <div class="chart-section">
+    <!-- Emoji Spending Bars -->
+    <div class="emoji-chart-section">
       <h3>Where Your Money Goes</h3>
-      <div class="chart-wrapper"><canvas id="guiltChart"></canvas></div>
+      <p class="section-sub">Every emoji = $1 wasted on that category.</p>
+      <div class="emoji-chart" id="emojiChart"></div>
     </div>
 
     <!-- Cut List -->
     <div class="cut-section">
       <h3>🔪 The Cut List</h3>
-      <p class="section-sub">Cancel these first. Frank insists.</p>
+      <p class="section-sub">Cancel these first. Steve insists.</p>
       <div id="cutList"></div>
     </div>
 
-    <!-- Frank Outro -->
-    <div class="frank-outro" id="frankOutro"></div>
+    <!-- Steve Outro -->
+    <div class="steve-outro" id="steveOutro"></div>
 
     <!-- Share Card -->
     <div class="share-section">
@@ -131,7 +132,7 @@
           <div class="share-label">GUILT SCORE</div>
           <div class="share-grade-badge" id="shareGradeBadge">F</div>
           <div class="share-stats" id="shareStats"></div>
-          <div class="share-url">subguilt.app</div>
+          <div class="share-url">subguilt.onrender.com</div>
         </div>
       </div>
       <div class="share-btns">
@@ -144,8 +145,8 @@
     <div class="leaderboard-section">
       <h3>🏆 Leaderboard</h3>
       <div class="lb-tabs">
-        <button class="lb-tab active" onclick="switchTab('wasters')">Top Wasters 🔥</button>
-        <button class="lb-tab" onclick="switchTab('savers')">Top Savers 💚</button>
+        <button class="lb-tab active" onclick="switchTab('wasters', event)">Top Wasters 🔥</button>
+        <button class="lb-tab" onclick="switchTab('savers', event)">Top Savers 💚</button>
       </div>
       <div id="leaderboardList"></div>
     </div>
@@ -156,12 +157,9 @@
 
 <footer class="footer">
   <p>Built for people who say "I barely use it" about everything they pay for.</p>
-  <p class="footer-sub">All data collected anonymously. No personal info stored ever.</p>
+  <p class="footer-sub">Steve is still recovering. All data collected anonymously.</p>
 </footer>
 
-<div id="confettiCanvas"></div>
-
-<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.9.2/dist/confetti.browser.min.js"></script>
 <script src="/static/js/app.js"></script>
 </body>
