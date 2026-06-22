@@ -1,8 +1,21 @@
 let subscriptions = [];
 let popularSubs = [];
-let guiltChart = null;
 let currentResults = null;
 let currentTab = 'wasters';
+
+const CATEGORY_EMOJIS = {
+  'Entertainment': '🎬',
+  'Music': '🎵',
+  'Productivity': '💼',
+  'Storage': '☁️',
+  'Education': '📚',
+  'Health': '💪',
+  'Professional': '👔',
+  'AI/Productivity': '🤖',
+  'Shopping/Entertainment': '🛍️',
+  'Shopping': '🛍️',
+  'Other': '📦'
+};
 
 async function loadPopular() {
   try {
@@ -14,7 +27,7 @@ async function loadPopular() {
 
 function renderQuickTags() {
   const container = document.getElementById('quickTags');
-  container.innerHTML = popularSubs.slice(0, 12).map(s =>
+  container.innerHTML = popularSubs.slice(0,12).map(s =>
     `<button class="quick-tag" onclick="quickAdd('${s.name}', ${s.avg_price}, '${s.category}')">${s.name}</button>`
   ).join('');
 }
@@ -71,7 +84,6 @@ async function calculate() {
   }).filter(r => r && r.name && r.price > 0);
 
   if (rows.length === 0) { alert('Add at least one subscription first!'); return; }
-
   const nickname = document.getElementById('nicknameInput').value.trim() || 'Anonymous';
 
   try {
@@ -94,8 +106,8 @@ function renderResults(data) {
   document.getElementById('results').style.display = 'block';
   window.scrollTo({ top: 0, behavior: 'smooth' });
 
-  // Frank verdict
-  document.getElementById('frankIntro').textContent = summary.frank_intro;
+  // Steve verdict
+  document.getElementById('steveIntro').textContent = summary.frank_intro;
 
   // Score
   const score = summary.overall_guilt;
@@ -112,24 +124,23 @@ function renderResults(data) {
     }, 1600);
   }
 
-  // Confetti on low score, fire emoji rain on high score
+  // Effects
   if (score <= 30) {
-    confetti({ particleCount: 150, spread: 80, origin: { y: 0.6 }, colors: ['#00C853','#FFE600','#7B2FFF'] });
+    confetti({ particleCount: 150, spread: 80, origin: { y: 0.6 }, colors: ['#90f1ef','#ffd6e0','#ffef9f'] });
   } else if (score >= 80) {
     fireEffect();
   }
 
-  // Summary stats
+  // Summary
   document.getElementById('monthlyTotal').textContent = `$${summary.total_monthly.toFixed(2)}`;
   document.getElementById('yearlyTotal').textContent = `$${summary.total_yearly.toFixed(2)}`;
   document.getElementById('wasteYearly').textContent = `$${summary.waste_yearly.toFixed(2)}`;
   const vsEl = document.getElementById('vsAverage');
   vsEl.textContent = `${summary.vs_average >= 0 ? '+' : ''}$${Math.abs(summary.vs_average).toFixed(0)}`;
-  vsEl.style.color = summary.vs_average >= 0 ? 'var(--red)' : 'var(--green)';
+  vsEl.style.color = summary.vs_average >= 0 ? '#ffd6e0' : '#00C853';
 
-  // Frank's Roasts
-  const roastList = document.getElementById('roastList');
-  roastList.innerHTML = results.map(r => `
+  // Steve's Roasts
+  document.getElementById('roastList').innerHTML = results.map(r => `
     <div class="roast-item">
       <div class="roast-emoji">${getRoastEmoji(r.guilt_score)}</div>
       <div>
@@ -151,20 +162,21 @@ function renderResults(data) {
       <span class="guilt-badge ${getBadgeClass(r.guilt_label)}">${r.guilt_label}</span>
     </div>`).join('');
 
-  renderChart(results);
+  // Emoji Chart
+  renderEmojiChart(results);
 
   // Cut List
   const cutItems = results.filter(r => r.is_waste);
   document.getElementById('cutList').innerHTML = cutItems.length === 0
-    ? `<div style="text-align:center;color:var(--green);padding:32px;font-size:18px">🎉 Frank is shocked. You're actually fine.</div>`
+    ? `<div style="text-align:center;color:#00C853;padding:32px;font-size:18px">🎉 Steve is shocked. You're actually fine.</div>`
     : cutItems.map(r => `
       <div class="cut-item">
         <div class="cut-info"><div class="cut-name">${r.name}</div><div class="cut-rec">${r.roast}</div></div>
         <div class="cut-savings">+$${(r.monthly_price*12).toFixed(0)}/yr</div>
       </div>`).join('');
 
-  // Frank outro
-  document.getElementById('frankOutro').textContent = `"${summary.frank_outro}" — Frank`;
+  // Steve outro
+  document.getElementById('steveOutro').textContent = `"${summary.frank_outro}" — Steve`;
 
   // Share card
   document.getElementById('shareScoreBig').textContent = score;
@@ -174,12 +186,35 @@ function renderResults(data) {
     ${summary.num_subscriptions} subscriptions tracked<br/>
     More wasteful than ${summary.percentile}% of users`;
 
-  // Leaderboard
   loadLeaderboard();
 }
 
+function renderEmojiChart(results) {
+  const catMap = {};
+  results.forEach(r => { catMap[r.category] = (catMap[r.category]||0) + r.monthly_price; });
+
+  const maxVal = Math.max(...Object.values(catMap));
+  const container = document.getElementById('emojiChart');
+
+  container.innerHTML = Object.entries(catMap)
+    .sort((a,b) => b[1] - a[1])
+    .map(([cat, amount]) => {
+      const emoji = CATEGORY_EMOJIS[cat] || '📦';
+      const barCount = Math.max(1, Math.round((amount / maxVal) * 20));
+      const bar = emoji.repeat(barCount);
+      return `
+        <div class="emoji-bar-row">
+          <div class="emoji-bar-header">
+            <span class="emoji-bar-cat">${emoji} ${cat}</span>
+            <span class="emoji-bar-amount">$${amount.toFixed(2)}/mo</span>
+          </div>
+          <div class="emoji-bar-track">${bar}</div>
+        </div>`;
+    }).join('');
+}
+
 function fireEffect() {
-  const emojis = ['🔥','💸','😭'];
+  const emojis = ['🔥','💸','😭','💀'];
   for (let i = 0; i < 15; i++) {
     setTimeout(() => {
       const el = document.createElement('div');
@@ -197,21 +232,6 @@ function fireEffect() {
   }
 }
 
-function renderChart(results) {
-  const catMap = {};
-  results.forEach(r => { catMap[r.category] = (catMap[r.category]||0) + r.monthly_price; });
-  const labels = Object.keys(catMap);
-  const values = Object.values(catMap);
-  const colors = ['#FF2D55','#FF6B00','#FFE600','#7B2FFF','#00C853','#0099FF','#FF69B4','#00CED1'];
-  if (guiltChart) guiltChart.destroy();
-  const ctx = document.getElementById('guiltChart').getContext('2d');
-  guiltChart = new Chart(ctx, {
-    type: 'doughnut',
-    data: { labels, datasets: [{ data: values, backgroundColor: colors.slice(0,labels.length), borderColor: '#1a1a1a', borderWidth: 3 }] },
-    options: { plugins: { legend: { labels: { color: '#fff', font: { family: 'Inter', size: 13 }, padding: 16 } }, tooltip: { callbacks: { label: ctx => ` $${ctx.parsed.toFixed(2)}/mo` } } } }
-  });
-}
-
 async function loadLeaderboard() {
   try {
     const res = await fetch('/api/leaderboard');
@@ -226,7 +246,7 @@ function renderLeaderboard(data) {
   const rankColors = ['gold','silver','bronze'];
   document.getElementById('leaderboardList').innerHTML = list.length === 0
     ? `<div style="text-align:center;color:var(--text-muted);padding:32px">No entries yet. You're first!</div>`
-    : list.map((e, i) => `
+    : list.map((e,i) => `
       <div class="lb-item">
         <div class="lb-rank ${rankColors[i]||''}">${i+1}</div>
         <div class="lb-info">
@@ -237,7 +257,7 @@ function renderLeaderboard(data) {
       </div>`).join('');
 }
 
-function switchTab(tab) {
+function switchTab(tab, event) {
   currentTab = tab;
   document.querySelectorAll('.lb-tab').forEach(t => t.classList.remove('active'));
   event.target.classList.add('active');
@@ -248,12 +268,10 @@ async function loadHallOfShame() {
   try {
     const res = await fetch('/api/hall-of-shame');
     const data = await res.json();
-    if (data.length > 0) {
-      const ticker = data.map(d => `${d.name} ignored by ${d.count} people 💸`).join('   ·   ');
-      document.getElementById('tickerTrack').textContent = ticker + '   ·   ' + ticker;
-    } else {
-      document.getElementById('tickerTrack').textContent = 'Adobe Creative Cloud · Gym Membership · Peloton · LinkedIn Premium · Duolingo Plus';
-    }
+    const ticker = data.length > 0
+      ? data.map(d => `${d.name} ignored by ${d.count} people 💸`).join('   ·   ')
+      : 'Adobe Creative Cloud · Gym Membership · Peloton · LinkedIn Premium · Duolingo Plus';
+    document.getElementById('tickerTrack').textContent = ticker + '   ·   ' + ticker;
   } catch(e) {
     document.getElementById('tickerTrack').textContent = 'Adobe Creative Cloud · Gym Membership · Peloton · LinkedIn Premium · Duolingo Plus';
   }
@@ -262,14 +280,14 @@ async function loadHallOfShame() {
 function shareTwitter() {
   if (!currentResults) return;
   const s = currentResults.summary;
-  const text = `I just got a ${s.overall_guilt}/100 guilt score on SubGuilt 💸\n\nI'm wasting $${s.waste_yearly.toFixed(0)}/year on subscriptions I barely use.\n\nFind out how guilty YOU should feel 👇\nsubguilt.app`;
+  const text = `I just got a ${s.overall_guilt}/100 guilt score on SubGuilt 💸\n\nI'm wasting $${s.waste_yearly.toFixed(0)}/year on subscriptions I barely use.\n\nSteve is disappointed in me.\n\nFind out how guilty YOU should feel 👇\nhttps://subscription-guilt.onrender.com`;
   window.open(`https://twitter.com/intent/tweet?text=${encodeURIComponent(text)}`, '_blank');
 }
 
 function copyShareText() {
   if (!currentResults) return;
   const s = currentResults.summary;
-  const text = `My SubGuilt score: ${s.overall_guilt}/100 (Grade: ${s.grade})\nI'm wasting $${s.waste_yearly.toFixed(0)}/year on unused subscriptions.\nMore wasteful than ${s.percentile}% of users.\nCheck yours at subguilt.app`;
+  const text = `My SubGuilt score: ${s.overall_guilt}/100 (Grade: ${s.grade})\nI'm wasting $${s.waste_yearly.toFixed(0)}/year on unused subscriptions.\nMore wasteful than ${s.percentile}% of users.\nSteve is not okay.\nCheck yours: https://subscription-guilt.onrender.com`;
   navigator.clipboard.writeText(text).then(() => {
     const btn = document.querySelector('.share-btn.copy');
     btn.textContent = 'Copied! 🎉';
@@ -286,23 +304,23 @@ function getRoastEmoji(score) {
 }
 
 function getBarColor(score) {
-  if (score >= 85) return 'var(--red)';
-  if (score >= 65) return 'var(--orange)';
-  if (score >= 40) return 'var(--yellow)';
+  if (score >= 85) return '#ffd6e0';
+  if (score >= 65) return '#ffef9f';
+  if (score >= 40) return '#90f1ef';
   if (score >= 20) return '#a97cff';
-  return 'var(--green)';
+  return '#00C853';
 }
 
 function getBadgeClass(label) {
-  return { 'DEAD WEIGHT':'badge-dead','BARELY USED':'badge-barely','QUESTIONABLE':'badge-questionable','DECENT USE':'badge-decent','WORTH IT':'badge-worth' }[label] || 'badge-worth';
+  return {'DEAD WEIGHT':'badge-dead','BARELY USED':'badge-barely','QUESTIONABLE':'badge-questionable','DECENT USE':'badge-decent','WORTH IT':'badge-worth'}[label]||'badge-worth';
 }
 
 function getScoreDesc(score) {
-  if (score >= 85) return "You are actively hemorrhaging money. Frank is horrified.";
-  if (score >= 65) return "You're wasting a solid chunk of cash. Frank sighs deeply.";
-  if (score >= 40) return "Could be better. Could be way worse. Frank shrugs.";
-  if (score >= 20) return "Not bad. Frank gives you a reluctant nod.";
-  return "You actually use what you pay for. Frank is suspicious.";
+  if (score >= 85) return "You are actively hemorrhaging money. Steve is filing for emotional damages.";
+  if (score >= 65) return "Significant waste detected. Steve had to sit down.";
+  if (score >= 40) return "Could be better. Could be way worse. Steve shrugs.";
+  if (score >= 20) return "Not bad. Steve gives you a reluctant nod.";
+  return "You actually use what you pay for. Steve is suspicious.";
 }
 
 function animateNumber(id, target, duration) {
